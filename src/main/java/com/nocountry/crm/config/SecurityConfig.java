@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -20,6 +21,9 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import static com.nocountry.crm.common.ApiPaths.LOGIN_PATH;
+import static com.nocountry.crm.common.ApiPaths.REGISTER_PATH;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -29,7 +33,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-//        return NoOpPasswordEncoder.getInstance();
         return new BCryptPasswordEncoder(12);
     }
 
@@ -60,10 +63,10 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("register", "login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/register").permitAll()
                         .anyRequest().authenticated()
                 )
-                .httpBasic((Customizer.withDefaults()));
+                .httpBasic(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

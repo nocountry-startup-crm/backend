@@ -1,15 +1,30 @@
 package com.nocountry.crm.entity;
 
+import com.nocountry.crm.entity.base.CompanyEntity;
+import com.nocountry.crm.entity.enums.RoleCode;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+import java.util.UUID;
+
 @Entity
 @Table(name = "users")
-public class User {
+@Getter
+@Setter
+@NoArgsConstructor
+public class User extends CompanyEntity{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    private String username;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+    private String imageUrl;
+    private String fullName;
+    private String email;
     private String password;
+//    @ManyToOne
+//    @JoinColumn(name = "role_id")
+//    private Role role;
+    @Enumerated(EnumType.STRING)
+    private RoleCode role;
 }
