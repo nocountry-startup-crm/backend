@@ -10,5 +10,5 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public abstract class CompanyEntity extends BaseEntity{
-    public int companyId;
+    public int companyId; // Company companyId
 }
