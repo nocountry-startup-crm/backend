@@ -2,12 +2,12 @@ package com.nocountry.crm.service.impl;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.nocountry.crm.common.FileExtension;
-import com.nocountry.crm.common.FileType;
+import com.nocountry.crm.entity.enums.FileExtension;
+import com.nocountry.crm.entity.enums.FileType;
 import com.nocountry.crm.dto.FileAttachment.FileAttachmentResponseDTO;
 import com.nocountry.crm.entity.FileAttachment;
 import com.nocountry.crm.repository.FileAttachmentRepository;
-import com.nocountry.crm.service.inter.ImageService;
+import com.nocountry.crm.service.IImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +18,7 @@ import java.nio.file.Path;
 import java.util.Map;
 
 @Service
-public class CloudinaryService implements ImageService {
+public class CloudinaryService implements IImageService {
     private final Cloudinary cloudinary;
     private final FileAttachmentRepository fileAttachmentRepository;
     @Autowired
@@ -77,7 +77,7 @@ public class CloudinaryService implements ImageService {
 
     private FileType determineFileType(String extension) {
         return switch (extension) {
-            case "JPG", "PNG" -> FileType.IMAGE;
+            case "JPG", "PNG", "JPEG" -> FileType.IMAGE;
             case "MP4" -> FileType.VIDEO;
             case "MP3" -> FileType.AUDIO;
             case "PDF" -> FileType.DOCUMENT;

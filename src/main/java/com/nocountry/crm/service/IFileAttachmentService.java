@@ -1,4 +1,4 @@
-package com.nocountry.crm.service.inter;
+package com.nocountry.crm.service;
 
 import com.nocountry.crm.entity.FileAttachment;
 

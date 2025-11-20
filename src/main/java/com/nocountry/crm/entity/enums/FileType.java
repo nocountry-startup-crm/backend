@@ -1,4 +1,4 @@
-package com.nocountry.crm.common;
+package com.nocountry.crm.entity.enums;
 
 public enum FileType {
     IMAGE,
