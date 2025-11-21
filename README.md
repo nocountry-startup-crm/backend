@@ -11,6 +11,7 @@ Process for creating a user and updating thier image:
 * String email
 * String password
 * String companyCode
+
 Note: no image is uploaded at this point. (Maybe a default image can be set here)
 2. USER logs in and updates their own profile using this endpoint: "PUT: api/v1/user/{id}". The information that can be updated is the following:
 * String fullName
@@ -19,4 +20,5 @@ Note: no image is uploaded at this point. (Maybe a default image can be set here
 * String companyCode
 * RoleCode role (maybe should be removed)
 * MultipartFile image
+
 Note: at the moment, only the image link is saved with the User entity. Entity "FileAttachment" isn't used here.
