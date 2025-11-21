@@ -6,6 +6,7 @@ import com.nocountry.crm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,8 +38,11 @@ public class UserController {
 
     // update
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseUserDto> updateUser(@PathVariable UUID id, @RequestBody RequestUserDto dto) {
-        ResponseUserDto updatedUser = userService.updateUser(id, dto);
+    public ResponseEntity<ResponseUserDto> updateUser(
+            @PathVariable UUID id,
+            @RequestPart("user") RequestUserDto dto,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        ResponseUserDto updatedUser = userService.updateUser(id, dto, image);
         if(updatedUser == null) return ResponseEntity.notFound().build();
 
         return ResponseEntity.ok(updatedUser);

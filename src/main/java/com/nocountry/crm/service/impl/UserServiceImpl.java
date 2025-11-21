@@ -12,7 +12,9 @@ import com.nocountry.crm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +25,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper mapper;
     private final PasswordEncoder encoder;
+    private final CloudinaryService cloudinaryService;
 
     @Override
     public ResponseUserDto saveUser(RequestUserDto dto) {
@@ -57,11 +60,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseUserDto updateUser(UUID id, RequestUserDto dto) {
+    public ResponseUserDto updateUser(UUID id, RequestUserDto dto, MultipartFile image) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
-        if (dto.imageUrl() != null) user.setImageUrl(dto.imageUrl());
+        String imageLink;
+
+        try {
+            imageLink = cloudinaryService.uploadImage(image).getUrl();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        user.setImageUrl(imageLink);
         if (dto.fullName() != null) user.setFullName(dto.fullName());
         if (dto.email() != null) user.setEmail(dto.email());
         if (dto.password() != null) {
