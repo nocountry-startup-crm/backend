@@ -6,6 +6,7 @@ Endpoints for User CRUD start with "api/v1/user":
 * DELETE ("api/v1/user/{id}"): delete user by id
 
 Process for creating a user and updating thier image:
+
 1. CUSTOMER_ADMIN creates a user using this endpoint: "POST: /api/v1/auth/register". The information required to create a user is:
 * String fullName
 * String email
@@ -13,6 +14,7 @@ Process for creating a user and updating thier image:
 * String companyCode
 
 Note: no image is uploaded at this point. (Maybe a default image can be set here)
+
 2. USER logs in and updates their own profile using this endpoint: "PUT: api/v1/user/{id}". The information that can be updated is the following:
 * String fullName
 * String email
