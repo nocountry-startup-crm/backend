@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
             user.setPassword(dto.password());
         }
 //        if (dto.companyCode() != null) user.setCompanyId(dto.companyCode());
-        if (dto.role() != null) user.setRole(dto.role());
+//        if (dto.role() != null) user.setRole(dto.role());
 
         User saved = userRepository.save(user);
         return mapper.toResponse(userRepository.save(user));
