@@ -1,6 +1,5 @@
 package com.nocountry.crm.security;
 
-import com.nocountry.crm.entity.User;
 import com.nocountry.crm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
@@ -20,7 +19,5 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Couldn't find username " + email));
-
-        //return new UserPrincipal(user);
     }
 }

@@ -4,6 +4,7 @@ import com.nocountry.crm.entity.base.CompanyEntity;
 import com.nocountry.crm.entity.enums.RoleCode;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-@Builder
+@SuperBuilder
 @Entity
 @Table(name = "users")
 @Getter
@@ -22,7 +23,7 @@ import java.util.UUID;
 public class User extends CompanyEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id; // blob?
+    private UUID id;
 
     private String imageUrl;
 
@@ -34,6 +35,7 @@ public class User extends CompanyEntity implements UserDetails {
 
     @Column(nullable = false)
     private String password;
+
 //    @ManyToOne
 //    @JoinColumn(name = "role_id")
 //    private Role role;

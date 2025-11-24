@@ -1,13 +1,13 @@
 package com.nocountry.crm.entity.base;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@SuperBuilder
 @MappedSuperclass
 @Getter
 @Setter
@@ -21,13 +21,13 @@ public abstract class BaseEntity {
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     @Column(name = "created_user_id")
-    private String createdUserId;
+    private UUID createdUserId;
 
     @Column(name = "updated_user_id")
-    private String updatedUserId;
+    private UUID updatedUserId;
 
     @Column(name = "deleted")
-    private boolean deleted;
+    private boolean deleted = false;
 
     @PreUpdate
     public void setUpdatedAt() {
