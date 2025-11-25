@@ -28,7 +28,8 @@ public class JwtTokenProvider {
         Map<String, Object> claims = Map.of(
                 "role", userDetails.getAuthorities(),
                 "fullName", user.getFullName(),
-                "email", user.getEmail()
+                "email", user.getEmail(),
+                "companyCode", user.getCompany().getCode()
         );
 
         return Jwts.builder()
@@ -60,6 +61,9 @@ public class JwtTokenProvider {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
+        final String companyCode = extractAllClaims(token).get("companyCode", String.class);
+        final User user = (User) userDetails;
+        if (!companyCode.equals((user.getCompany().getCode()))) return false;
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 

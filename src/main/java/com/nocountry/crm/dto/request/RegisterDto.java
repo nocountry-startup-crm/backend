@@ -6,13 +6,21 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-@Schema(description = "Request para autenticación de usuario")
-public class LoginDto {
+@Schema(description = "Request para registro de nuevo usuario")
+public class RegisterDto {
+    @Schema(
+            description = "Nombre del usuario completo",
+            example = "Juan Pérez",
+            required = true
+    )
+    @NotBlank(message = "El nombre es obligatorio")
+    String fullName;
 
     @Schema(
-            description = "Email del usuario",
+            description = "Email del usuario (debe ser único)",
             example = "juan@example.com",
-            required = true
+            required = true,
+            format = "email"
     )
     @NotBlank(message = "El email es obligatorio")
     @Email(message = "El email debe ser válido")
@@ -28,7 +36,7 @@ public class LoginDto {
 
     @Schema(
             description = "Código de la empresa",
-            example = "465FDF",
+            example = "ADD545",
             required = true
     )
     @NotBlank(message = "El código de la empresa es obligatoria")
