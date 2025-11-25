@@ -1,6 +1,7 @@
 package com.nocountry.crm.entity.base;
 
 import com.nocountry.crm.entity.Company;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;

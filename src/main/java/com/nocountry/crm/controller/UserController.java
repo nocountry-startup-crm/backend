@@ -31,7 +31,7 @@ public class UserController {
 
     // get user by id
     @Operation(
-            summary = "Obtener un usuario",
+            summary = "Obtener usuario por UUID",
             description = "Obtiene los datos de un usuario por su UUID",
             security = @SecurityRequirement(name = "Bearer Authentication")
     )
@@ -153,7 +153,7 @@ public class UserController {
 
     // update
     @Operation(
-            summary = "Actualizar usuario",
+            summary = "Actualizar usuario por UUID",
             description = "Actualiza un usuario existente por su UUID",
             security = @SecurityRequirement(name = "Bearer Authentication")
     )
@@ -210,7 +210,7 @@ public class UserController {
 
     // delete by id
     @Operation(
-            summary = "Eliminar usuario",
+            summary = "Eliminar usuario por UUID",
             description = "Elimina un usuario por su UUID",
             security = @SecurityRequirement(name = "Bearer Authentication")
     )

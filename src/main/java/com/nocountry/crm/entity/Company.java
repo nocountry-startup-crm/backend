@@ -18,6 +18,7 @@ public class Company extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false, unique = true)
     private String code;
 
     private String name;

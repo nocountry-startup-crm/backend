@@ -97,7 +97,7 @@ public class AuthController {
     }
 
     @Operation(
-            summary = "Iniciar sesión",
+            summary = "Iniciar sesión de usuario",
             description = "Autentica un usuario existente y retorna token JWT",
             security = @SecurityRequirement(name = "")
     )
