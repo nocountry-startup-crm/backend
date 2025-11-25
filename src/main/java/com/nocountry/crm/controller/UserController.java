@@ -2,7 +2,6 @@ package com.nocountry.crm.controller;
 
 import com.nocountry.crm.dto.request.LoginDto;
 import com.nocountry.crm.dto.request.RequestUserDto;
-import com.nocountry.crm.dto.response.AuthResponseDto;
 import com.nocountry.crm.dto.response.ResponseUserDto;
 import com.nocountry.crm.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +25,7 @@ import static com.nocountry.crm.common.ApiPaths.USER_BASE;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(USER_BASE)
-@Tag(name = "CRUD de usuarios", description = "Endpoints de obtención, actualización y eliminación de usuarios")
+@Tag(name = "CRUD user", description = "Endpoints de obtención, actualización y eliminación de usuarios")
 public class UserController {
     private final UserService userService;
 

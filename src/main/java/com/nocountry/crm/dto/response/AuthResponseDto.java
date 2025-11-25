@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Builder
 @Data
 @Schema(description = "Response de autenticación con tokens JWT")
@@ -15,4 +17,11 @@ public class AuthResponseDto {
             required = true
     )
     private String token;
+
+    @Schema(
+            description = "UUID del usuario",
+            example = "5721554-d316-4c60-929c-6a5c0c501326",
+            required = true
+    )
+    private UUID userId;
 }

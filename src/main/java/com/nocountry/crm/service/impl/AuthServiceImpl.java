@@ -13,9 +13,10 @@ import com.nocountry.crm.service.IAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -43,10 +44,11 @@ public class AuthServiceImpl implements IAuthService {
                 .updatedUserId(creatorUser.getId())
                 .build();
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
         String token = jwtTokenProvider.generateToken(user);
         return AuthResponseDto.builder()
                 .token(token)
+                .userId(savedUser.getId())
                 .build();
     }
 
@@ -60,18 +62,16 @@ public class AuthServiceImpl implements IAuthService {
         );
 
         User user = userRepository.findByEmail(loginDto.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found."));
+                .orElseThrow(() -> new RuntimeException("Bad credentials."));
 
-        Company company = companyRepository.findByCode(loginDto.getCompanyCode())
-                .orElseThrow(() -> new RuntimeException("Company not found."));
-
-        if (user.getCompany().getId() != company.getId()) {
+        if (!Objects.equals(user.getCompany().getCode(), loginDto.getCompanyCode())) {
             throw new RuntimeException("Bad credentials.");
         }
 
         String token = jwtTokenProvider.generateToken(user);
         return AuthResponseDto.builder()
                 .token(token)
+                .userId(user.getId())
                 .build();
     }
 }

@@ -46,7 +46,8 @@ public class AuthController {
                             examples = @ExampleObject(
                                     value = """
                                     {
-                                      "token": "eyJhbGciOiJIUzI1NiJ9..."
+                                      "token": "eyJhbGciOiJIUzI1NiJ9...",
+                                      "userId": "5721554-d316-4c60-929c-6a5c0c501326"
                                     }
                                     """
                             )
@@ -110,7 +111,8 @@ public class AuthController {
                             examples = @ExampleObject(
                                     value = """
                                     {
-                                      "token": "eyJhbGciOiJIUzI1NiJ9..."
+                                      "token": "eyJhbGciOiJIUzI1NiJ9...",
+                                      "userId": "5721554-d316-4c60-929c-6a5c0c501326"
                                     }
                                     """
                             )
