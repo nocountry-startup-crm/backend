@@ -2,11 +2,14 @@ package com.nocountry.crm.service.impl;
 
 import com.nocountry.crm.dto.request.RequestUserDto;
 import com.nocountry.crm.dto.response.ResponseUserDto;
+import com.nocountry.crm.entity.Company;
 import com.nocountry.crm.entity.Role;
 import com.nocountry.crm.entity.User;
 import com.nocountry.crm.entity.enums.RoleCode;
+import com.nocountry.crm.exception.CompanyNotFoundException;
 import com.nocountry.crm.exception.UserNotFoundException;
 import com.nocountry.crm.mapper.UserMapper;
+import com.nocountry.crm.repository.ICompanyRepository;
 import com.nocountry.crm.repository.UserRepository;
 import com.nocountry.crm.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,7 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final ICompanyRepository companyRepository;
     private final UserMapper mapper;
     private final PasswordEncoder encoder;
     private final CloudinaryService cloudinaryService;
@@ -78,8 +82,11 @@ public class UserServiceImpl implements UserService {
         if (dto.password() != null) {
             user.setPassword(dto.password());
         }
-//        if (dto.companyCode() != null) user.setCompanyId(dto.companyCode());
-//        if (dto.role() != null) user.setRole(dto.role());
+        if (dto.companyCode() != null) {
+            Company company = companyRepository.findByCode(dto.companyCode())
+                    .orElseThrow(() -> new CompanyNotFoundException(dto.companyCode()));
+            user.setCompany(company);
+        }
 
         User saved = userRepository.save(user);
         return mapper.toResponse(userRepository.save(user));

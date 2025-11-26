@@ -90,6 +90,12 @@ public class TagServiceImpl implements ITagService {
         tagRepository.deleteById(tagId);
     }
 
+    @Override
+    public Tag findByCode(String code) {
+        return tagRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("Tag no encontrado con código " + code));
+    }
+
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));

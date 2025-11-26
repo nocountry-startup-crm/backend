@@ -3,7 +3,11 @@ package com.nocountry.crm.dto.response;
 import com.nocountry.crm.entity.enums.RoleCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.UUID;
+
 public record ResponseUserDto(
+        @Schema(description = "UUID del usuario", example = "550e8400-e29b-41d4-a716-446655440001")
+        UUID id,
 
         @Schema(
                 description = "URL de la imagen del usuario",
