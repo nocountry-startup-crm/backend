@@ -1,11 +1,8 @@
 package com.nocountry.crm.controller;
 
 import com.nocountry.crm.dto.request.RequestFilterDto;
-import com.nocountry.crm.dto.request.RequestTagDto;
 import com.nocountry.crm.dto.response.ResponseFilterDto;
-import com.nocountry.crm.dto.response.ResponseTagDto;
 import com.nocountry.crm.service.IFilterService;
-import com.nocountry.crm.service.impl.FilterServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -47,9 +44,9 @@ public class FilterController {
     })
     @PostMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
-    public ResponseEntity<ResponseFilterDto> createTag(
+    public ResponseEntity<ResponseFilterDto> createFilter(
             Authentication authentication,
-            @RequestBody RequestTagDto request) {
+            @RequestBody RequestFilterDto request) {
         String userEmail = authentication.getName();
         ResponseFilterDto response = filterService.createFilter(userEmail, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -67,8 +64,8 @@ public class FilterController {
             @Parameter(description = "UUID del filtro", example = "550e8400-e29b-41d4-a716-446655440001")
             @PathVariable UUID id) {
         String userEmail = authentication.getName();
-        ResponseFilterDto tag = filterService.getFilterById(userEmail, id);
-        return ResponseEntity.ok(tag);
+        ResponseFilterDto filter = filterService.getFilterById(userEmail, id);
+        return ResponseEntity.ok(filter);
     }
 
     @Operation(
@@ -81,8 +78,8 @@ public class FilterController {
     public ResponseEntity<List<ResponseFilterDto>> getAllFiltersByUser(
             Authentication authentication) {
         String userEmail = authentication.getName();
-        List<ResponseFilterDto> tags = filterService.getAllFiltersByUser(userEmail);
-        return ResponseEntity.ok(tags);
+        List<ResponseFilterDto> filters = filterService.getAllFiltersByCompany(userEmail);
+        return ResponseEntity.ok(filters);
     }
 
     @Operation(
@@ -117,20 +114,20 @@ public class FilterController {
                     )
             )
             Authentication authentication,
-            @RequestBody RequestTagDto request) {
+            @RequestBody RequestFilterDto request) {
         String userEmail = authentication.getName();
         ResponseFilterDto response = filterService.updateFilter(userEmail, id, request);
         return ResponseEntity.ok(response);
     }
 
     @Operation(
-            summary = "Eliminar tag por UUID",
-            description = "Elimina un tag por su UUID",
+            summary = "Eliminar filtro por UUID",
+            description = "Elimina un filtro por su UUID",
             security = @SecurityRequirement(name = "Bearer Authentication")
     )
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
-    public ResponseEntity<Void> deleteTag(
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER ADMIN')")
+    public ResponseEntity<Void> deleteFilter(
             Authentication authentication,
             @Parameter(description = "UUID del filtro", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID id) {

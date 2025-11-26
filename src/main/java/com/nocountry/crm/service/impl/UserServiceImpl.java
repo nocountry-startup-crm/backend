@@ -13,6 +13,7 @@ import com.nocountry.crm.repository.ICompanyRepository;
 import com.nocountry.crm.repository.UserRepository;
 import com.nocountry.crm.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -101,5 +102,11 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public User getUserByEmail(String userEmail) {
+        return userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con el email " + userEmail));
     }
 }
