@@ -3,6 +3,8 @@ package com.nocountry.crm.security;
 import com.nocountry.crm.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -14,13 +16,20 @@ import java.util.function.Function;
 @Component
 public class JwtTokenProvider {
     private static final SecretKey key = Jwts.SIG.HS256.key().build();
+    @Value("${jwt.secret}")
+    private String secret;
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     public String generateToken(UserDetails userDetails) {
         User user = (User) userDetails;
         Map<String, Object> claims = Map.of(
                 "role", userDetails.getAuthorities(),
                 "fullName", user.getFullName(),
-                "email", user.getEmail()
+                "email", user.getEmail(),
+                "companyCode", user.getCompany().getCode()
         );
 
         return Jwts.builder()
@@ -52,6 +61,9 @@ public class JwtTokenProvider {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
+        final String companyCode = extractAllClaims(token).get("companyCode", String.class);
+        final User user = (User) userDetails;
+        if (!companyCode.equals((user.getCompany().getCode()))) return false;
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
