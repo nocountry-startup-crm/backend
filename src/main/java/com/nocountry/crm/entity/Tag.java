@@ -31,7 +31,8 @@ public class Tag extends CompanyEntity {
     @Enumerated(EnumType.STRING)
     private TagColor color;
 
-    //private Set<Contact> contacts;
+    @ManyToMany(mappedBy = "tags")
+    private Set<Contact> contacts;
 
     //private Set<Filter> filters;
 }
