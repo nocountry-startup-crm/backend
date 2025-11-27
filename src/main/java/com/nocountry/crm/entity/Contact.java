@@ -1,17 +1,16 @@
 package com.nocountry.crm.entity;
 
+import com.nocountry.crm.entity.base.CompanyEntity;
 import com.nocountry.crm.entity.enums.FileType;
 import com.nocountry.crm.entity.enums.FunnelStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -20,7 +19,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Contact {
+public class Contact extends CompanyEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -42,6 +41,7 @@ public class Contact {
     private String phone;
 
     @Column(name = "country_id")
+    @Null
     private UUID countryId;
 
     @Enumerated(EnumType.STRING)
@@ -56,4 +56,12 @@ public class Contact {
 
     @Column(name = "active", nullable = false)
     private boolean active = true;
+
+    @ManyToMany
+    @JoinTable(
+        name = "contact_tag",
+        joinColumns = @JoinColumn(name = "contact_id"),
+        inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags;
 }
