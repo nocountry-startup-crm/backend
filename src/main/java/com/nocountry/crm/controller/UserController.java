@@ -216,7 +216,7 @@ public class UserController {
     }
 
     // update
-    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER_ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER_ADMIN')")
     @PutMapping()
     public ResponseEntity<ResponseUserDto> updateUser(
             @AuthenticationPrincipal UserPrincipal user,

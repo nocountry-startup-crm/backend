@@ -2,6 +2,7 @@ package com.nocountry.crm.service;
 
 import com.nocountry.crm.dto.request.RequestUserDto;
 import com.nocountry.crm.dto.response.ResponseUserDto;
+import com.nocountry.crm.entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -18,4 +19,6 @@ public interface UserService {
     ResponseUserDto updateUser(UUID id, RequestUserDto dto, MultipartFile image);
 
     void deleteUser(UUID id);
+
+    User getUserByEmail(String userEmail);
 }
