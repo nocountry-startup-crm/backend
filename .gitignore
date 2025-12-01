@@ -33,4 +33,5 @@ build/
 .vscode/
 
 ### Local ###
-/application-local.properties
+src/main/resources/application-local.properties
+src/main/resources/client_secret.json
