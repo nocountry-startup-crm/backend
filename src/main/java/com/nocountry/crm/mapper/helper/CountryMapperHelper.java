@@ -19,7 +19,7 @@ public class CountryMapperHelper {
 
         List<Country> countries = new ArrayList<>();
         for (String code : codes) {
-            Country c = countryRepository.findByCode(code)
+            Country c = countryRepository.findByAcronym(code)
                     .orElseThrow(() -> new RuntimeException("País no encontrado con código " + code));
             if (c != null) {
                 countries.add(c);

@@ -3,6 +3,7 @@ package com.nocountry.crm.controller;
 import com.nocountry.crm.dto.request.LoginDto;
 import com.nocountry.crm.dto.request.RegisterDto;
 import com.nocountry.crm.dto.response.AuthResponseDto;
+import com.nocountry.crm.dto.response.ResponseDto;
 import com.nocountry.crm.service.IAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -73,7 +74,7 @@ public class AuthController {
     })
     @PostMapping("/register")
     @PreAuthorize("hasRole('CUSTOMER_ADMIN')")
-    public ResponseEntity<AuthResponseDto> register(
+    public ResponseDto<AuthResponseDto> register(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Datos del nuevo usuario",
                     required = true,
@@ -93,7 +94,8 @@ public class AuthController {
             )
             Authentication authentication,
             @RequestBody RegisterDto registerDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(authentication.getName(), registerDto));
+        return new ResponseDto<>(authService.register(authentication.getName(), registerDto), HttpStatus.CREATED, 0);
+        //return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(authentication.getName(), registerDto));
     }
 
     @Operation(
@@ -137,7 +139,7 @@ public class AuthController {
             )
     })
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDto> login(
+    public ResponseDto<AuthResponseDto> login(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Credenciales de inicio de sesión",
                     required = true,
@@ -155,6 +157,7 @@ public class AuthController {
                     )
             )
             @RequestBody LoginDto loginDto) {
-        return ResponseEntity.ok(authService.login(loginDto));
+        return new ResponseDto<>(authService.login(loginDto), HttpStatus.OK, 0);
+        //return ResponseEntity.ok(authService.login(loginDto));
     }
 }

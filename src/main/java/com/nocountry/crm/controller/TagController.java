@@ -2,6 +2,7 @@ package com.nocountry.crm.controller;
 
 import com.nocountry.crm.dto.request.LoginDto;
 import com.nocountry.crm.dto.request.RequestTagDto;
+import com.nocountry.crm.dto.response.ResponseDto;
 import com.nocountry.crm.dto.response.ResponseTagDto;
 import com.nocountry.crm.dto.response.ResponseUserDto;
 import com.nocountry.crm.service.ITagService;
@@ -47,12 +48,13 @@ public class TagController {
     })
     @PostMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
-    public ResponseEntity<ResponseTagDto> createCategory(
+    public ResponseDto<ResponseTagDto> createCategory(
             Authentication authentication,
             @RequestBody RequestTagDto request) {
         String userEmail = authentication.getName();
         ResponseTagDto response = tagService.createTag(userEmail, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return new ResponseDto<>(response, HttpStatus.CREATED, 0);
+        //return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(
@@ -62,13 +64,13 @@ public class TagController {
     )
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
-    public ResponseEntity<ResponseTagDto> getTagById(
-            Authentication authentication,
+    public ResponseDto<ResponseTagDto> getTagById(
+            //Authentication authentication,
             @Parameter(description = "UUID del tag", example = "550e8400-e29b-41d4-a716-446655440001")
             @PathVariable UUID id) {
-        String userEmail = authentication.getName();
-        ResponseTagDto tag = tagService.getTagById(userEmail, id);
-        return ResponseEntity.ok(tag);
+        //String userEmail = authentication.getName();
+        ResponseTagDto tag = tagService.getTagById(id);
+        return new ResponseDto<>(tag, HttpStatus.OK, 0);
     }
 
     @Operation(
@@ -78,11 +80,13 @@ public class TagController {
     )
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
-    public ResponseEntity<List<ResponseTagDto>> getAllTagsByUser(
-            Authentication authentication) {
-        String userEmail = authentication.getName();
-        List<ResponseTagDto> tags = tagService.getAllTagsByUser(userEmail);
-        return ResponseEntity.ok(tags);
+    public ResponseDto<List<ResponseTagDto>> getAllTags(
+            //Authentication authentication
+    ) {
+        //String userEmail = authentication.getName();
+        List<ResponseTagDto> tags = tagService.getAllTags();
+        return new ResponseDto<>(tags, HttpStatus.OK, 0);
+        //return ResponseEntity.ok(tags);
     }
 
     @Operation(
@@ -99,7 +103,7 @@ public class TagController {
     })
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
-    public ResponseEntity<ResponseTagDto> updateTag(
+    public ResponseDto<ResponseTagDto> updateTag(
             @Parameter(description = "UUID del tag", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -120,7 +124,8 @@ public class TagController {
             @RequestBody RequestTagDto request) {
         String userEmail = authentication.getName();
         ResponseTagDto response = tagService.updateTag(userEmail, id, request);
-        return ResponseEntity.ok(response);
+        return new ResponseDto<>(response, HttpStatus.OK, 0);
+        //return ResponseEntity.ok(response);
     }
 
     @Operation(
@@ -130,12 +135,13 @@ public class TagController {
     )
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
-    public ResponseEntity<Void> deleteTag(
-            Authentication authentication,
+    public ResponseDto<Void> deleteTag(
+            //Authentication authentication,
             @Parameter(description = "UUID del tag", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID id) {
-        String userEmail = authentication.getName();
-        tagService.deleteTag(userEmail, id);
-        return ResponseEntity.noContent().build();
+        //String userEmail = authentication.getName();
+        tagService.deleteTag(id);
+        return new ResponseDto<>(null, HttpStatus.OK, 0);
+        //return ResponseEntity.noContent().build();
     }
 }

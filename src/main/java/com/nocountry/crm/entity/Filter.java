@@ -1,7 +1,6 @@
 package com.nocountry.crm.entity;
 
 import com.nocountry.crm.entity.base.CompanyEntity;
-import com.nocountry.crm.entity.enums.TagColor;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
