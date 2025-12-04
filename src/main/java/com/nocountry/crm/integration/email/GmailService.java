@@ -13,10 +13,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
-import com.google.api.services.gmail.model.ListMessagesResponse;
-import com.google.api.services.gmail.model.Message;
-import com.google.api.services.gmail.model.MessagePart;
-import com.google.api.services.gmail.model.MessagePartHeader;
+import com.google.api.services.gmail.model.*;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Service;
@@ -28,17 +25,20 @@ import javax.mail.internet.MimeMessage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class GmailService {
     public static final String TEST_EMAIL = "nccrm3326@gmail.com";
     private Gmail service;
+    private static final Set<String> scopes = new HashSet<>(List.of(
+            GmailScopes.GMAIL_READONLY,
+            GmailScopes.GMAIL_COMPOSE,
+            GmailScopes.GMAIL_MODIFY,
+            GmailScopes.GMAIL_LABELS));
 
     @PostConstruct
     public void init() throws Exception {
@@ -52,6 +52,17 @@ public class GmailService {
         )
                 .setApplicationName("Test Mailer")
                 .build();
+
+        setUpWatch();
+    }
+
+    private void setUpWatch() throws IOException {
+        WatchRequest watchRequest = new WatchRequest()
+                .setLabelIds(List.of("INBOX"))
+                .setTopicName("projects/nc-crm-479822/topics/DemoTopic");
+
+        WatchResponse watchResponse = service.users().watch("me", watchRequest).execute();
+        System.out.println("Gmail watch started. Expiration: " + watchResponse.getExpiration());
     }
 
     private static Credential getCredentials(final NetHttpTransport httpTransport, GsonFactory jsonFactory)
@@ -62,7 +73,7 @@ public class GmailService {
 
         // Build flow and trigger user authorization request.
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                httpTransport, jsonFactory, clientSecrets, Set.of(GmailScopes.GMAIL_READONLY)) // what are we authorized to do?
+                httpTransport, jsonFactory, clientSecrets, scopes) // what are we authorized to do?
                 .setDataStoreFactory(new FileDataStoreFactory(Paths.get("tokens").toFile()))
                 .setAccessType("offline")
                 .build();
@@ -143,6 +154,54 @@ public class GmailService {
         }
     }
 
+    public void printMessagesUsingHistoryId(BigInteger historyId) throws Exception {
+        ListHistoryResponse historyResponse = service.users()
+                .history()
+                .list("me")
+                .setStartHistoryId(historyId)
+                .execute();
+
+        List<String> newMessageIds = new ArrayList<>();
+
+        if (historyResponse.getHistory() != null) {
+            for (History history : historyResponse.getHistory()) {
+                if (history.getMessagesAdded() != null) {
+                    for (HistoryMessageAdded added : history.getMessagesAdded()) {
+                        newMessageIds.add(added.getMessage().getId());
+                    }
+                }
+            }
+        }
+
+        if (newMessageIds.isEmpty()) System.out.println("No messages found.");
+        else {
+            System.out.println("Messages: ");
+            for (String messageId : newMessageIds) {
+                Message message = service.users()
+                        .messages()
+                        .get("me", messageId)
+                        .setFormat("full")
+                        .execute();
+
+                System.out.println("Message ID: " + message.getId());
+                System.out.println("History ID: " + message.getHistoryId());
+
+                System.out.println("Snippet: " + message.getSnippet());
+
+                for(MessagePartHeader header : message.getPayload().getHeaders()) {
+                    if(header.getName().equals("From")) System.out.println(header.values());
+                    if(header.getName().equals("To")) System.out.println(header.values());
+                    if(header.getName().equals("Subject")) System.out.println(header.values());
+                    if(header.getName().equals("Date")) System.out.println(header.values());
+                }
+
+
+                System.out.println(getBody(message.getPayload()));
+                System.out.println();
+            }
+        }
+    }
+
     private static String getBody(MessagePart part) {
         if (part == null)
             return "No message found";
@@ -164,4 +223,5 @@ public class GmailService {
 
         return "No message found";
     }
+
 }
