@@ -1,6 +1,7 @@
 package com.nocountry.crm.controller;
 
 import com.nocountry.crm.dto.request.RequestFilterDto;
+import com.nocountry.crm.dto.response.ResponseDto;
 import com.nocountry.crm.dto.response.ResponseFilterDto;
 import com.nocountry.crm.service.IFilterService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,12 +45,13 @@ public class FilterController {
     })
     @PostMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
-    public ResponseEntity<ResponseFilterDto> createFilter(
+    public ResponseDto<ResponseFilterDto> createFilter(
             Authentication authentication,
             @RequestBody RequestFilterDto request) {
         String userEmail = authentication.getName();
         ResponseFilterDto response = filterService.createFilter(userEmail, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return new ResponseDto<>(response, HttpStatus.CREATED, 0);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(
@@ -59,13 +61,14 @@ public class FilterController {
     )
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
-    public ResponseEntity<ResponseFilterDto> getFilterById(
+    public ResponseDto<ResponseFilterDto> getFilterById(
             Authentication authentication,
             @Parameter(description = "UUID del filtro", example = "550e8400-e29b-41d4-a716-446655440001")
             @PathVariable UUID id) {
         String userEmail = authentication.getName();
-        ResponseFilterDto filter = filterService.getFilterById(userEmail, id);
-        return ResponseEntity.ok(filter);
+        ResponseFilterDto response = filterService.getFilterById(userEmail, id);
+        return new ResponseDto<>(response, HttpStatus.OK, 0);
+//        return ResponseEntity.ok(filter);
     }
 
     @Operation(
@@ -75,11 +78,12 @@ public class FilterController {
     )
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
-    public ResponseEntity<List<ResponseFilterDto>> getAllFiltersByUser(
+    public ResponseDto<List<ResponseFilterDto>> getAllFiltersByUser(
             Authentication authentication) {
         String userEmail = authentication.getName();
-        List<ResponseFilterDto> filters = filterService.getAllFiltersByCompany(userEmail);
-        return ResponseEntity.ok(filters);
+        List<ResponseFilterDto> response = filterService.getAllFiltersByCompany(userEmail);
+        return new ResponseDto<>(response, HttpStatus.OK, 0);
+//        return ResponseEntity.ok(response);
     }
 
     @Operation(
@@ -96,7 +100,7 @@ public class FilterController {
     })
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
-    public ResponseEntity<ResponseFilterDto> updateFilter(
+    public ResponseDto<ResponseFilterDto> updateFilter(
             @Parameter(description = "UUID del filtro", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -117,7 +121,8 @@ public class FilterController {
             @RequestBody RequestFilterDto request) {
         String userEmail = authentication.getName();
         ResponseFilterDto response = filterService.updateFilter(userEmail, id, request);
-        return ResponseEntity.ok(response);
+        return new ResponseDto<>(response, HttpStatus.OK, 0);
+//        return ResponseEntity.ok(response);
     }
 
     @Operation(
@@ -127,13 +132,14 @@ public class FilterController {
     )
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER ADMIN')")
-    public ResponseEntity<Void> deleteFilter(
+    public ResponseDto<Void> deleteFilter(
             Authentication authentication,
             @Parameter(description = "UUID del filtro", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID id) {
         String userEmail = authentication.getName();
         filterService.deleteFilter(userEmail, id);
-        return ResponseEntity.noContent().build();
+        return new ResponseDto<>(null, HttpStatus.OK, 0);
+//        return ResponseEntity.noContent().build();
     }
 
 }
