@@ -1,6 +1,5 @@
 package com.nocountry.crm.dto.response;
 
-import com.nocountry.crm.entity.enums.TagColor;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +20,6 @@ public class ResponseTagDto {
     @Schema(description = "Color en hexadecimal", example = "#FF5733")
     private String code;
 
-    @Schema(description = "Color del tag", example = "RED")
-    private TagColor color;
+    //@Schema(description = "Color del tag", example = "RED")
+    private String color;
 }

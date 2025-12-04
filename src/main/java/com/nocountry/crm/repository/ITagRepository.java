@@ -12,7 +12,6 @@ import java.util.UUID;
 
 @Repository
 public interface ITagRepository extends JpaRepository<Tag, UUID> {
-    List<Tag> findByCreatedUserId(UUID createdUserId);
     Optional<Tag> findByCode(String code);
-    boolean existsByNameAndCreatedUserId(String name, UUID createdUserId);
+    boolean existsByName(String name);
 }

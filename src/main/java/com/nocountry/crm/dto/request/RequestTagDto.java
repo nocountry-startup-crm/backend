@@ -1,6 +1,5 @@
 package com.nocountry.crm.dto.request;
 
-import com.nocountry.crm.entity.enums.TagColor;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -21,7 +20,7 @@ public class RequestTagDto {
     @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "El color debe estar en formato hexadecimal (#RRGGBB)")
     private String code;
 
-    @Schema(description = "Color del tag", example = "RED")
-    @NotBlank(message = "Elegir un color para el tag es obligatorio")
-    private TagColor color;
+    //@Schema(description = "Color del tag", example = "RED")
+    //@NotBlank(message = "Elegir un color para el tag es obligatorio")
+    private String color;
 }

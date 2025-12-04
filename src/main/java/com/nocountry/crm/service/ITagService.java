@@ -9,10 +9,10 @@ import java.util.UUID;
 
 public interface ITagService {
     ResponseTagDto createTag(String userEmail, RequestTagDto requestTagDto);
-    ResponseTagDto getTagById(String userEmail, UUID tagId);
-    List<ResponseTagDto> getAllTagsByUser(String userEmail);
+    ResponseTagDto getTagById(UUID tagId);
+    List<ResponseTagDto> getAllTags();
     ResponseTagDto updateTag(String userEmail, UUID tagId, RequestTagDto requestTagDto);
-    void deleteTag(String userEmail, UUID tagId);
+    void deleteTag(UUID tagId);
 
     Tag findByCode(String code);
 }

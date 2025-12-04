@@ -3,6 +3,9 @@ package com.nocountry.crm.entity;
 import com.nocountry.crm.entity.base.CompanyEntity;
 import com.nocountry.crm.entity.enums.RoleCode;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,13 +30,19 @@ public class User extends CompanyEntity implements UserDetails {
 
     private String imageUrl;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false, length = 255)
+    @NotNull(message = "Full name is required")
+    @Size(max = 255, message = "Full name cannot exceed 255 characters")
     private String fullName;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, length = 255, unique = true)
+    @Email(message = "Email should be valid")
+    @Size(max = 255, message = "Email cannot exceed 255 characters")
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
+    @NotNull(message = "Password is required")
+    @Size(max = 255, message = "Password cannot exceed 255 characters")
     private String password;
 
 //    @ManyToOne

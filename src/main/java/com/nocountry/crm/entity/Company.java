@@ -3,6 +3,8 @@ package com.nocountry.crm.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nocountry.crm.entity.base.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.Set;
@@ -21,6 +23,9 @@ public class Company extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String code;
 
+    @Column(name = "Name", nullable = false, length = 255)
+    @NotNull(message = "Name is required")
+    @Size(max = 255, message = "Name cannot exceed 255 characters")
     private String name;
 
     private String logoUrl;

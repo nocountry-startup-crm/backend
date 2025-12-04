@@ -27,7 +27,7 @@ public class ContactController {
     private final ContactService contactService;
 
     @PostMapping
-    @PreAuthorize("hasRole('USER)'")
+    @PreAuthorize("hasRole('USER')")
     public ResponseDto<Contact> createContact(@RequestBody CreateContactDto contact) {
         Contact contactRes = contactService.save(contact);
         if(contactRes == null) return new ResponseDto<>(null, HttpStatus.INTERNAL_SERVER_ERROR, 1);
@@ -36,7 +36,7 @@ public class ContactController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasRole('USER)'")
+    @PreAuthorize("hasRole('USER')")
     public ResponseDto<PageResponseDto<SearchContactResultDto>> searchContact(SearchContactCriteriaDto criteria) {
         PageResponseDto<SearchContactResultDto> contacts = contactService.contactsSearch(criteria);
 

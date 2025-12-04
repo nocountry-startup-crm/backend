@@ -4,13 +4,13 @@ import com.nocountry.crm.dto.request.RequestTagDto;
 import com.nocountry.crm.dto.response.ResponseTagDto;
 import com.nocountry.crm.entity.Tag;
 import com.nocountry.crm.entity.User;
-import com.nocountry.crm.entity.enums.TagColor;
+import com.nocountry.crm.exception.FunctionalException;
 import com.nocountry.crm.mapper.TagMapper;
-import com.nocountry.crm.mapper.UserMapper;
 import com.nocountry.crm.repository.ITagRepository;
-import com.nocountry.crm.repository.UserRepository;
 import com.nocountry.crm.service.ITagService;
+import com.nocountry.crm.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -22,16 +22,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TagServiceImpl implements ITagService {
     private final ITagRepository tagRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final TagMapper tagMapper;
 
     @Override
     public ResponseTagDto createTag(String userEmail, RequestTagDto requestTagDto) {
-        User user = getUserByEmail(userEmail);
+        User user = userService.getUserByEmail(userEmail);
 
-        // Validar que no exista un tag con el mismo nombre
-        if (tagRepository.existsByNameAndCreatedUserId(requestTagDto.getName(), user.getCreatedUserId())) {
-            throw new RuntimeException("Ya existe un tag con ese nombre");
+        if (tagRepository.existsByName(requestTagDto.getName())) {
+            throw new FunctionalException("There is already a tag with the same name.", HttpStatus.CONFLICT);
         }
 
         Tag tag = tagMapper.toEntity(requestTagDto);
@@ -44,15 +43,15 @@ public class TagServiceImpl implements ITagService {
     }
 
     @Override
-    public ResponseTagDto getTagById(String userEmail, UUID tagId) {
-        Tag tag = isUserValid(userEmail, tagId);
+    public ResponseTagDto getTagById(UUID tagId) {
+        Tag tag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new FunctionalException("Tag not found.", HttpStatus.NOT_FOUND));
         return tagMapper.toResponse(tag);
     }
 
     @Override
-    public List<ResponseTagDto> getAllTagsByUser(String userEmail) {
-        User user = getUserByEmail(userEmail);
-        List<Tag> tags = tagRepository.findByCreatedUserId(user.getId());
+    public List<ResponseTagDto> getAllTags() {
+        List<Tag> tags = tagRepository.findAll();
 
         return tags.stream()
                 .map(tagMapper::toResponse)
@@ -61,13 +60,13 @@ public class TagServiceImpl implements ITagService {
 
     @Override
     public ResponseTagDto updateTag(String userEmail, UUID tagId, RequestTagDto requestTagDto) {
-        User user = getUserByEmail(userEmail);
-        Tag tag = isUserValid(userEmail, tagId);
+        User user = userService.getUserByEmail(userEmail);
+        Tag tag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new FunctionalException("Tag not found.", HttpStatus.NOT_FOUND));
 
-        // Validar que no exista un tag con el mismo nombre
         if (!requestTagDto.getName().equals(tag.getName()) &&
-                tagRepository.existsByNameAndCreatedUserId(requestTagDto.getName(), user.getCreatedUserId())) {
-            throw new RuntimeException("Ya existe un tag con ese nombre");
+                tagRepository.existsByName(requestTagDto.getName())) {
+            throw new FunctionalException("There is already a tag with the same name.", HttpStatus.CONFLICT);
         }
         // validar por company tambien?
 
@@ -76,17 +75,16 @@ public class TagServiceImpl implements ITagService {
         tag.setColor(requestTagDto.getColor() != null ? requestTagDto.getColor() : tag.getColor());
         tag.setUpdatedUserId(user.getId());
 
-        System.out.println(tag);
-
-
         Tag savedtag = tagRepository.save(tag);
         System.out.println(savedtag);
         return tagMapper.toResponse(savedtag);
     }
 
     @Override
-    public void deleteTag(String userEmail, UUID tagId) {
-        isUserValid(userEmail, tagId);
+    public void deleteTag(UUID tagId) {
+        if (!tagRepository.existsById(tagId)) {
+            throw new FunctionalException("Tag not found.", HttpStatus.NOT_FOUND);
+        }
         tagRepository.deleteById(tagId);
     }
 
@@ -94,18 +92,5 @@ public class TagServiceImpl implements ITagService {
     public Tag findByCode(String code) {
         return tagRepository.findByCode(code)
                 .orElseThrow(() -> new RuntimeException("Tag no encontrado con código " + code));
-    }
-
-    private User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-    }
-
-    private Tag isUserValid(String userEmail, UUID tagId) {
-        User user = getUserByEmail(userEmail);
-        Tag tag = tagRepository.findById(tagId)
-                .orElseThrow(() -> new RuntimeException("Tag no encontrado"));
-        if (!Objects.equals(tag.getCreatedUserId(), user.getId())) throw new RuntimeException("Bad request");
-        return tag;
     }
 }

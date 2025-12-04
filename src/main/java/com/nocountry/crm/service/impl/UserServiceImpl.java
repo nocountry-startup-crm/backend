@@ -69,15 +69,16 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
-        String imageLink;
-
-        try {
-            imageLink = cloudinaryService.uploadImage(image).getUrl();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (image != null) {
+            String imageLink;
+            try {
+                imageLink = cloudinaryService.uploadImage(image).getUrl();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            user.setImageUrl(imageLink);
         }
 
-        user.setImageUrl(imageLink);
         if (dto.fullName() != null) user.setFullName(dto.fullName());
         if (dto.email() != null) user.setEmail(dto.email());
         if (dto.password() != null) {
@@ -90,7 +91,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User saved = userRepository.save(user);
-        return mapper.toResponse(userRepository.save(user));
+        return mapper.toResponse(saved);
     }
 
     @Override

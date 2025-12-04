@@ -1,8 +1,8 @@
 package com.nocountry.crm.entity;
 
 import com.nocountry.crm.entity.base.CompanyEntity;
-import com.nocountry.crm.entity.enums.TagColor;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -16,23 +16,24 @@ import java.util.UUID;
 @Getter
 @Setter
 @Table(name = "tags")
-@ToString
 public class Tag extends CompanyEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
+    @NotNull(message = "Name is required")
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String code;
 
-    @Enumerated(EnumType.STRING)
-    private TagColor color;
+    @Column(nullable = false)//
+    @NotNull(message = "Color is required")//
+    private String color;
 
-    @ManyToMany(mappedBy = "tags")
-    private Set<Contact> contacts;
+    //@ManyToMany(mappedBy = "tags")
+    //private Set<Contact> contacts;
 
     //private Set<Filter> filters;
 }
