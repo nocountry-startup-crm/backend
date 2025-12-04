@@ -7,12 +7,14 @@ import com.nocountry.crm.entity.Role;
 import com.nocountry.crm.entity.User;
 import com.nocountry.crm.entity.enums.RoleCode;
 import com.nocountry.crm.exception.CompanyNotFoundException;
+import com.nocountry.crm.exception.FunctionalException;
 import com.nocountry.crm.exception.UserNotFoundException;
 import com.nocountry.crm.mapper.UserMapper;
 import com.nocountry.crm.repository.ICompanyRepository;
 import com.nocountry.crm.repository.UserRepository;
 import com.nocountry.crm.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,7 +37,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseUserDto saveUser(RequestUserDto dto) {
         if (userRepository.existsByEmail(dto.email())) {
-            throw new IllegalArgumentException("Email already in use.");
+            throw new FunctionalException("Email already in use.", HttpStatus.CONFLICT);
         }
 
         User user = mapper.toEntity(dto);
@@ -45,13 +47,18 @@ public class UserServiceImpl implements UserService {
 
         return mapper.toResponse(
                 userRepository.findById(user.getId())
-                        .orElseThrow(()-> new UserNotFoundException(user.getId())));
+                        .orElseThrow(()-> new FunctionalException(
+                                "User not found with id " + user.getId() +
+                                        ". Please ensure the user exists in the system.",
+                                HttpStatus.NOT_FOUND)));
     }
 
     @Override
     public ResponseUserDto getUserById(UUID id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> new FunctionalException(
+                        "User not found with id " + id + ". Please ensure the user exists in the system.",
+                        HttpStatus.NOT_FOUND));
 
         return mapper.toResponse(user);
     }
@@ -67,14 +74,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseUserDto updateUser(UUID id, RequestUserDto dto, MultipartFile image) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> new FunctionalException(
+                        "User not found with id " + id + ". Please ensure the user exists in the system.",
+                        HttpStatus.NOT_FOUND));
 
         if (image != null) {
             String imageLink;
             try {
                 imageLink = cloudinaryService.uploadImage(image).getUrl();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Cloudinary IO Exception. " + e);
             }
             user.setImageUrl(imageLink);
         }
@@ -86,7 +95,10 @@ public class UserServiceImpl implements UserService {
         }
         if (dto.companyCode() != null) {
             Company company = companyRepository.findByCode(dto.companyCode())
-                    .orElseThrow(() -> new CompanyNotFoundException(dto.companyCode()));
+                    .orElseThrow(() -> new FunctionalException(
+                            "Company not found with code " + dto.companyCode() +
+                                    ". Please ensure the company code exists in the system.",
+                            HttpStatus.NOT_FOUND));
             user.setCompany(company);
         }
 
@@ -97,7 +109,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(UUID id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> new FunctionalException(
+                        "User not found with id " + id + ". Please ensure the user exists in the system.",
+                        HttpStatus.NOT_FOUND));
 
         user.setDeleted(true);
         userRepository.save(user);
@@ -108,6 +122,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserByEmail(String userEmail) {
         return userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con el email " + userEmail));
+                .orElseThrow(() -> new FunctionalException(
+                        "User not found with email " + userEmail + ". Please ensure the user exists in the system.",
+                        HttpStatus.NOT_FOUND));
     }
 }
