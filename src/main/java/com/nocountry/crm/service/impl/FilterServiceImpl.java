@@ -7,6 +7,7 @@ import com.nocountry.crm.dto.response.ResponseTagDto;
 import com.nocountry.crm.entity.Filter;
 import com.nocountry.crm.entity.Tag;
 import com.nocountry.crm.entity.User;
+import com.nocountry.crm.exception.FunctionalException;
 import com.nocountry.crm.exception.UserNotFoundException;
 import com.nocountry.crm.mapper.FilterMapper;
 import com.nocountry.crm.mapper.helper.CountryMapperHelper;
@@ -16,6 +17,7 @@ import com.nocountry.crm.repository.UserRepository;
 import com.nocountry.crm.service.IFilterService;
 import com.nocountry.crm.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -36,10 +38,11 @@ public class FilterServiceImpl implements IFilterService {
     @Override
     public ResponseFilterDto createFilter(String userEmail, RequestFilterDto request) {
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + userEmail));
+                .orElseThrow(() -> new FunctionalException(
+                        "Usuario no encontrado con email: " + userEmail, HttpStatus.CONFLICT));
 
         if (filterRepository.existsByName(request.name())) {
-            throw new RuntimeException("Ya existe un filtro con ese nombre");
+            throw new FunctionalException("Ya existe un filtro con ese nombre", HttpStatus.CONFLICT);
         }
 
         Filter filter = filterMapper.toEntity(request);
@@ -74,10 +77,11 @@ public class FilterServiceImpl implements IFilterService {
 
         if (!request.name().equals(filter.getName()) &&
                 filterRepository.existsByNameAndCompanyId(request.name(), user.getCompany().getId())) {
-            throw new RuntimeException("Ya existe un filtro con ese nombre");
+            throw new FunctionalException(
+                    "Filter name is used. Please use a different filter name.", HttpStatus.CONFLICT);
         }
 
-        filter.setName(request.name() != null ? request.name() : filter.getName());
+        filter.setName(request.name());
         filter.setCode(request.code() != null ? request.code() : filter.getCode());
         filter.setContactCreationFrom(request.contactCreationFrom() != null ?
                 request.contactCreationFrom() : filter.getContactCreationFrom());
@@ -102,13 +106,15 @@ public class FilterServiceImpl implements IFilterService {
 
     private Filter getFilterById(UUID filterId) {
         return filterRepository.findById(filterId)
-                .orElseThrow(() -> new UsernameNotFoundException("Filtro no encontrado con el id " + filterId));
+                .orElseThrow(() -> new FunctionalException(
+                        "Filtro no encontrado con el id " + filterId, HttpStatus.NOT_FOUND));
     }
 
     private Filter isUserValid(String userEmail, UUID filterId) {
         User user = userService.getUserByEmail(userEmail);
         Filter filter = getFilterById(filterId);
-        if (!Objects.equals(filter.getCompany(), user.getCompany())) throw new RuntimeException("Bad request");
+        if (!Objects.equals(filter.getCompany(), user.getCompany())) throw new FunctionalException(
+                "El usuario no es parte de la compañía que es dueña del filtro", HttpStatus.BAD_REQUEST);
         return filter;
     }
 }

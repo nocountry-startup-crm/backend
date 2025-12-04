@@ -2,6 +2,7 @@ package com.nocountry.crm.controller;
 
 import com.nocountry.crm.dto.request.LoginDto;
 import com.nocountry.crm.dto.request.RequestUserDto;
+import com.nocountry.crm.dto.response.ResponseDto;
 import com.nocountry.crm.dto.response.ResponseUserDto;
 import com.nocountry.crm.security.UserPrincipal;
 import com.nocountry.crm.service.UserService;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -101,16 +103,13 @@ public class UserController {
     })
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER_ADMIN')")
-    public ResponseEntity<ResponseUserDto> getUser(
+    public ResponseDto<ResponseUserDto> getUser(
             @Parameter(description = "UUID del usuario", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID id) {
         ResponseUserDto user = userService.getUserById(id);
 
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(user);
+        return new ResponseDto<>(user, HttpStatus.OK, 0);
+//        return ResponseEntity.ok(user);
     }
 
     // get all users
@@ -153,8 +152,9 @@ public class UserController {
     })
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER_ADMIN')")
-    public ResponseEntity<List<ResponseUserDto>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseDto<List<ResponseUserDto>> getAllUsers() {
+        return new ResponseDto<>(userService.getAllUsers(), HttpStatus.OK, 0);
+//        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     // update
@@ -191,7 +191,7 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER_ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseUserDto> updateUser(
+    public ResponseDto<ResponseUserDto> updateUser(
             @Parameter(description = "UUID del usuario", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -211,23 +211,22 @@ public class UserController {
             @RequestPart("user") RequestUserDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image) {
         ResponseUserDto updatedUser = userService.updateUser(id, dto, image);
-        if(updatedUser == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(updatedUser);
+        return new ResponseDto<>(updatedUser, HttpStatus.OK, 0);
+//        return ResponseEntity.ok(updatedUser);
     }
 
     // update
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER_ADMIN')")
     @PutMapping()
-    public ResponseEntity<ResponseUserDto> updateUser(
+    public ResponseDto<ResponseUserDto> updateUser(
             @AuthenticationPrincipal UserPrincipal user,
             @RequestPart("user") RequestUserDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image) {
         UUID id = user.getUser().getId();
         ResponseUserDto updatedUser = userService.updateUser(id, dto, image);
 
-        if(updatedUser == null) return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok(updatedUser);
+        return new ResponseDto<>(updatedUser, HttpStatus.OK, 0);
+//        return ResponseEntity.ok(updatedUser);
     }
 
     // delete by id
@@ -242,10 +241,11 @@ public class UserController {
     })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER_ADMIN')")
-    public ResponseEntity<Void> deleteUser(
+    public ResponseDto<Void> deleteUser(
             @Parameter(description = "UUID del usuario", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID id) {
         userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
+        return new ResponseDto<>(null, HttpStatus.OK, 0);
+//        return ResponseEntity.noContent().build();
     }
 }
