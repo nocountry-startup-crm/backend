@@ -16,6 +16,6 @@ import lombok.experimental.SuperBuilder;
 public abstract class CompanyEntity extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
-    private Company company; // x q public?
+    private Company company;
 }
 

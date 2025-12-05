@@ -44,6 +44,19 @@ public class ContactService implements IContactService {
     @Autowired
     private final ITagRepository tagRepository;
 
+    public Contact findContactByEmail(String email) {
+        return contactRepository.findByEmail(email)
+                .orElseThrow(() -> new FunctionalException(
+                        "Contact not found. Please ensure the contact exists in the system.", HttpStatus.NOT_FOUND));
+    }
+
+    @Override
+    public Contact findById(UUID contactId) {
+        return contactRepository.findById(contactId)
+                .orElseThrow(() -> new FunctionalException(
+                        "Contact not found. Please ensure the contact exists in the system.", HttpStatus.NOT_FOUND));
+    }
+
     @Override
     public Contact save(CreateContactDto createContactDto) {
         if (contactRepository.existsByEmail(createContactDto.email())) {

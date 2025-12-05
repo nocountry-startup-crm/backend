@@ -9,4 +9,5 @@ import java.util.UUID;
 
 public interface ContactRepository extends JpaRepository<Contact, UUID>, JpaSpecificationExecutor<Contact> {
     boolean existsByEmail(String email);
+    Optional<Contact> findByEmail(String email);
 }

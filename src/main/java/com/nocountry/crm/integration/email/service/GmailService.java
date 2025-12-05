@@ -1,4 +1,4 @@
-package com.nocountry.crm.integration.email;
+package com.nocountry.crm.integration.email.service;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -14,7 +14,12 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.*;
+import com.nocountry.crm.dto.response.ResponseEmailMessageDto;
+import com.nocountry.crm.entity.EmailMessage;
+import com.nocountry.crm.integration.email.mapper.GmailMessageMapper;
+import com.nocountry.crm.repository.EmailMessageRepository;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Service;
 
@@ -27,13 +32,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class GmailService {
     public static final String TEST_EMAIL = "nccrm3326@gmail.com";
+    private final HistoryTrackerService trackerService;
+    private final GmailMessageMapper messageMapper;
+    private final EmailMessageRepository emailMessageRepository;
     private Gmail service;
+
     private static final Set<String> scopes = new HashSet<>(List.of(
             GmailScopes.GMAIL_READONLY,
             GmailScopes.GMAIL_COMPOSE,
@@ -63,6 +72,9 @@ public class GmailService {
 
         WatchResponse watchResponse = service.users().watch("me", watchRequest).execute();
         System.out.println("Gmail watch started. Expiration: " + watchResponse.getExpiration());
+        System.out.println("Initial historyId: " + watchResponse.getHistoryId());
+
+        trackerService.saveInitialHistoryId(watchResponse.getHistoryId());
     }
 
     private static Credential getCredentials(final NetHttpTransport httpTransport, GsonFactory jsonFactory)
@@ -112,53 +124,20 @@ public class GmailService {
             if (error.getCode() == 403) {
                 System.err.println("Unable to send message: " + e.getDetails());
             } else {
-                throw e;
+                throw new RuntimeException(e);
             }
         }
     }
 
-    private void printMessages(String label) throws Exception {
-        // set label to "INBOX" or "SENT"
-        ListMessagesResponse listResponse = service.users()
-                .messages()
-                .list("me")
-                .setLabelIds(Collections.singletonList(label))
-                .execute();
-
-        List<Message> messages = listResponse.getMessages();
-
-        if (messages == null || messages.isEmpty()) System.out.println("No messages found.");
-        else {
-            System.out.println("Messages: ");
-            for (Message message : messages) {
-                System.out.println("Message ID: " + message.getId());
-                Message fullMessage = service.users()
-                        .messages()
-                        .get("me", message.getId())
-                        .setFormat("full")
-                        .execute();
-
-                System.out.println("Snippet: " + fullMessage.getSnippet());
-
-                for(MessagePartHeader header : fullMessage.getPayload().getHeaders()) {
-                    if(header.getName().equals("From")) System.out.println(header.values());
-                    if(header.getName().equals("To")) System.out.println(header.values());
-                    if(header.getName().equals("Subject")) System.out.println(header.values());
-                    if(header.getName().equals("Date")) System.out.println(header.values());
-                }
+    public List<ResponseEmailMessageDto> saveMessagesUsingHistoryId(long newHistoryId) throws Exception {
+        BigInteger previousHistoryId = trackerService.getLastHistoryId();
+        BigInteger nextHistoryId = BigInteger.valueOf(newHistoryId);
 
 
-                System.out.println(getBody(fullMessage.getPayload()));
-                System.out.println();
-            }
-        }
-    }
-
-    public void printMessagesUsingHistoryId(BigInteger historyId) throws Exception {
         ListHistoryResponse historyResponse = service.users()
                 .history()
                 .list("me")
-                .setStartHistoryId(historyId)
+                .setStartHistoryId(previousHistoryId)
                 .execute();
 
         List<String> newMessageIds = new ArrayList<>();
@@ -173,55 +152,31 @@ public class GmailService {
             }
         }
 
-        if (newMessageIds.isEmpty()) System.out.println("No messages found.");
-        else {
-            System.out.println("Messages: ");
-            for (String messageId : newMessageIds) {
-                Message message = service.users()
-                        .messages()
-                        .get("me", messageId)
-                        .setFormat("full")
-                        .execute();
-
-                System.out.println("Message ID: " + message.getId());
-                System.out.println("History ID: " + message.getHistoryId());
-
-                System.out.println("Snippet: " + message.getSnippet());
-
-                for(MessagePartHeader header : message.getPayload().getHeaders()) {
-                    if(header.getName().equals("From")) System.out.println(header.values());
-                    if(header.getName().equals("To")) System.out.println(header.values());
-                    if(header.getName().equals("Subject")) System.out.println(header.values());
-                    if(header.getName().equals("Date")) System.out.println(header.values());
-                }
-
-
-                System.out.println(getBody(message.getPayload()));
-                System.out.println();
-            }
+        if (newMessageIds.isEmpty()) {
+            trackerService.updateHistoryId(nextHistoryId);
+            return List.of();
         }
+
+        List<EmailMessage> saved = new ArrayList<>();
+
+        for (String messageId : newMessageIds) {
+            Message message = service.users()
+                    .messages()
+                    .get("me", messageId)
+                    .setFormat("full")
+                    .execute();
+            EmailMessage savedMessage = emailMessageRepository.save(messageMapper.toEntity(message));
+            saved.add(savedMessage);
+        }
+
+        trackerService.updateHistoryId(nextHistoryId);
+
+        return saved
+                .stream()
+                .map(messageMapper::toDto)
+                .toList();
     }
 
-    private static String getBody(MessagePart part) {
-        if (part == null)
-            return "No message found";
 
-        // If this part has data (base64 encoded)
-        if (part.getBody() != null && part.getBody().getData() != null) {
-            byte[] bytes = java.util.Base64.getUrlDecoder().decode(part.getBody().getData());
-            return new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
-        }
-
-        // Otherwise check its parts recursively
-        if (part.getParts() != null) {
-            StringBuilder builder = new StringBuilder();
-            for (MessagePart subPart : part.getParts()) {
-                builder.append(getBody(subPart));
-            }
-            return builder.toString();
-        }
-
-        return "No message found";
-    }
 
 }
