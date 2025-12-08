@@ -27,6 +27,21 @@ public class CloudinaryService implements IImageService {
         this.fileAttachmentRepository = fileAttachmentRepository;
     }
 
+    public Map<String, Object> uploadMedia(byte[] fileBytes) {
+        try {
+            return cloudinary.uploader().upload(
+                    fileBytes,
+                    ObjectUtils.asMap(
+                            "use_filename", false,
+                            "unique_filename", true,
+                            "overwrite", false
+                    )
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Error upload file to Cloudinary", e);
+        }
+    }
+
     public FileAttachmentResponseDTO uploadImage(MultipartFile image) throws IOException {
         FileAttachmentResponseDTO response = new FileAttachmentResponseDTO();
 

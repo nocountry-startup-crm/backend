@@ -126,4 +126,12 @@ public class UserServiceImpl implements UserService {
                         "User not found with email " + userEmail + ". Please ensure the user exists in the system.",
                         HttpStatus.NOT_FOUND));
     }
+
+    @Override
+    public User findById(UUID id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new FunctionalException(
+                        "User not found with id " + id + ". Please ensure the user exists in the system.",
+                        HttpStatus.NOT_FOUND));
+    }
 }

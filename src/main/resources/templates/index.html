@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Conversations</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+</head>
+<body>
+<h1>Conversation</h1>
+<div id="notifications"></div>
+
+<h2>Create contact</h2>
+<input type="text" id="phone" placeholder="Phone">
+<button onclick="createContact()">Create (Debe estar en lista de WhatsApp API)</button>
+<br><br>
+
+<h2>Send text message</h2>
+<input type="text" id="content" placeholder="Content" required>
+<button onclick="sendMessage()">Send</button>
+
+<h2>Send file to WhatsApp</h2>
+
+<form id="uploadForm">
+
+    <label>File:</label>
+    <input type="file" id="file" required>
+
+    <br><br>
+
+    <button type="submit">Send</button>
+</form>
+
+<script>
+
+    fetch('http://localhost:8081/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        //credentials: 'include', // Importante para CORS
+        body: JSON.stringify({
+            email: 'user@example.com',
+            password: 'User12345678',
+            companyCode: "777"
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('userId', data.data.userId);
+    });
+
+    let stompClient = null;
+    function connect() {
+        const socket = new SockJS(`http://localhost:8081/ws?token=${localStorage.getItem('token')}`);  // Correct the WebSocket URL
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/messages/', function (message) {
+                showNotification(message.body);
+            });
+
+            stompClient.subscribe('/topic/files/', function (message) {
+                showNotification(message.body);
+            });
+
+        }, function (error) {
+            console.error('WebSocket connection error: ' + error);
+        });
+
+        /*stompClient.connect({}, function (frame) {
+
+        }, function (error) {
+            console.error('WebSocket connection error: ' + error);
+        });*/
+    }
+
+
+    /*function sendMessage() {
+        const message = document.getElementById('message').value;
+        if (stompClient && stompClient.connected) {
+            stompClient.send('/app/sendMessage', {}, message);
+            console.log('Message sent:', message);
+        } else {
+            console.error('WebSocket connection is not established.');
+        }
+    }*/
+    function sendMessage() {
+        const userId = localStorage.getItem('userId');
+        const contactId = localStorage.getItem('contactId');
+        const content = document.getElementById('content').value;
+        const message = {
+            'userId': userId,
+            'contactId': contactId,
+            'content': content
+        }
+
+        if (stompClient && stompClient.connected) {
+            stompClient.send('/app/sendMessage', {}, JSON.stringify(message));
+            console.log('Message sent:', message);
+        } else {
+            console.error('WebSocket connection is not established.');
+        }
+    }
+
+    function showNotification(message) {
+        const notifications = document.getElementById('notifications');
+        const notification = document.createElement('p');
+        notification.textContent = message;
+        notifications.appendChild(notification);
+    }
+
+    function createContact() {
+        fetch('http://localhost:8081/api/v1/contact', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                fullName: "Contact 1",
+                email: "contact_1@example.com",
+                phone: document.getElementById("phone").value,
+                funnelStatus: "NEW",
+                tagIds: []
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            localStorage.setItem('contactId', data.data.id);
+        });
+    }
+
+
+    document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        const dto = {
+            userId: localStorage.getItem('userId'),
+            contactId: localStorage.getItem('contactId'),
+            content: document.getElementById("content").value
+        }
+        formData.append('dto', new Blob([JSON.stringify(dto)], { type: "application/json" }));
+        formData.append("file", document.getElementById("file").files[0]);
+
+            const resp = await fetch("http://localhost:8081/api/v1/whatsapp/send-media", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }//,
+                //credentials: 'include'
+            });
+
+            //const text = await resp.text();
+            //alert(text);
+            const fileInfo = await resp.json(); // text
+            console.log(fileInfo)
+        //} catch (error) {
+        //    console.error('Error al subir el archivo:', error);
+        //}
+
+        /*stompClient.send(
+            //"/app/chat.sendFile",
+            "/app/sendFile",
+            {},
+            JSON.stringify({
+                sender: "pepe",
+                fileId: fileInfo.fileId,
+                url: fileInfo.url,
+                conversationId: conversationId
+                //filename: file.name
+            })
+        );*/
+    });
+
+    /*async function uploadFile(file) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("http://localhost:8080/api/files/upload", {
+            method: "POST",
+            body: formData
+        });
+
+        return await response.json(); // fileId + url
+    }*/
+
+    /*function sendFileNotification(fileInfo, file) {
+        stompClient.send(
+            "/app/chat.sendFile",
+            {},
+            JSON.stringify({
+                sender: "hil",
+                fileId: fileInfo.fileId,
+                url: fileInfo.url,
+                filename: file.name
+            })
+        );
+    }
+
+    async function handleSendFile(event) {
+        const file = event.target.files[0];
+
+        const fileInfo = await uploadFile(file);
+        console.log(fileInfo);
+
+        sendFileNotification(fileInfo, file);
+    }*/
+
+    connect();
+</script>
+</body>
+</html>

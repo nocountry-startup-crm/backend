@@ -38,4 +38,8 @@ public class Company extends BaseEntity {
     @OneToMany(mappedBy = "company")
     @JsonIgnore
     private Set<User> userSet;
+
+    //private String whatsappPhoneId;
+
+    //private String whatsAppAccsessToken;
 }

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Real-Time Notifications</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+</head>
+<body>
+<h1>Real-Time Notifications</h1>
+<div id="notifications"></div>
+
+
+<script>
+    let stompClient = null;
+    const jwt = "eyJhbGciOiJIUzI1NiJ9.eyJjb21wYW55Q29kZSI6Ijc3NyIsImZ1bGxOYW1lIjoiY3VzdG9tZXIgY3VzdG9tZXJfYWRtaW4iLCJyb2xlIjpbeyJhdXRob3JpdHkiOiJST0xFX0NVU1RPTUVSX0FETUlOIn1dLCJlbWFpbCI6ImN1c3RvbWVyX2FkbWluQGV4YW1wbGUuY29tIiwic3ViIjoiY3VzdG9tZXJfYWRtaW5AZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ3NDg1MTksImV4cCI6MTc2NDgzNDkxOX0.SQfgUxVGXDLawuqDIioV5FY0dwFaLlM6xjWebyeoXH8";
+
+    function connect() {
+        const socket = new SockJS('http://localhost:8081/ws?token=' + jwt);  // Correct the WebSocket URL
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);  // Log the successful connection
+            stompClient.subscribe('/topic/messages/100', function (message) {
+                showNotification(message.body);  // Handle incoming messages
+            });
+        }, function (error) {
+            console.error('WebSocket connection error: ' + error);  // Log WebSocket errors
+        });
+    }
+
+
+
+    function showNotification(message) {
+        const notifications = document.getElementById('notifications');
+        const notification = document.createElement('p');
+        notification.textContent = message;
+        notifications.appendChild(notification);
+    }
+
+    connect();
+</script>
+</body>
+</html>

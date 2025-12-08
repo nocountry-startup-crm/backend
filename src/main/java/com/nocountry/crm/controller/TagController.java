@@ -47,7 +47,7 @@ public class TagController {
             )
     })
     @PostMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER_ADMIN')")
     public ResponseDto<ResponseTagDto> createCategory(
             Authentication authentication,
             @RequestBody RequestTagDto request) {
@@ -63,7 +63,7 @@ public class TagController {
             security = @SecurityRequirement(name = "Bearer Authentication")
     )
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER_ADMIN')")
     public ResponseDto<ResponseTagDto> getTagById(
             //Authentication authentication,
             @Parameter(description = "UUID del tag", example = "550e8400-e29b-41d4-a716-446655440001")
@@ -79,7 +79,7 @@ public class TagController {
             security = @SecurityRequirement(name = "Bearer Authentication")
     )
     @GetMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER_ADMIN')")
     public ResponseDto<List<ResponseTagDto>> getAllTags(
             //Authentication authentication
     ) {
@@ -102,7 +102,7 @@ public class TagController {
             )
     })
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER_ADMIN')")
     public ResponseDto<ResponseTagDto> updateTag(
             @Parameter(description = "UUID del tag", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID id,
@@ -134,7 +134,7 @@ public class TagController {
             security = @SecurityRequirement(name = "Bearer Authentication")
     )
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'CUSTOMER_ADMIN')")
     public ResponseDto<Void> deleteTag(
             //Authentication authentication,
             @Parameter(description = "UUID del tag", example = "550e8400-e29b-41d4-a716-446655440000")

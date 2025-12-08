@@ -32,7 +32,8 @@ public class ContactController {
         Contact contactRes = contactService.save(contact);
         if(contactRes == null) return new ResponseDto<>(null, HttpStatus.INTERNAL_SERVER_ERROR, 1);
 
-        return new ResponseDto<>(null, HttpStatus.OK, 0);
+        //return new ResponseDto<>(null, HttpStatus.OK, 0);
+        return new ResponseDto<>(contactRes, HttpStatus.OK, 0);
     }
 
     @GetMapping("/search")

@@ -13,10 +13,12 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class DataInit implements CommandLineRunner {
+
     private final ICompanyRepository companyRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ICompanyRepository iCompanyRepository;
+    private User customer_admin, user;
+    private Company companyCrm;
 
     @Override
     public void run(String... args) {
@@ -29,20 +31,29 @@ public class DataInit implements CommandLineRunner {
     }
 
     void insertCompanies() {
-        Company companyCrm = new Company();
+        companyCrm = new Company();
         companyCrm.setName("Company CRM");
         companyCrm.setCode("777");
-        iCompanyRepository.save(companyCrm);
+        companyCrm = companyRepository.save(companyCrm);
     }
 
     void insertUsers() {
-        User customer_admin = new User();
+        Company companyCrm = companyRepository.findByCode("777").get();
+
+        customer_admin = new User();
         customer_admin.setFullName("customer customer_admin");
         customer_admin.setEmail("customer_admin@example.com");
         customer_admin.setPassword(passwordEncoder.encode("CustomerAdmin12345678"));
         customer_admin.setRole(RoleCode.CUSTOMER_ADMIN);
-        Company companyCrm = companyRepository.findByCode("777").get();
         customer_admin.setCompany(companyCrm);
-        userRepository.save(customer_admin);
+        customer_admin = userRepository.save(customer_admin);
+
+        user = new User();
+        user.setFullName("user");
+        user.setEmail("user@example.com");
+        user.setPassword(passwordEncoder.encode("User12345678"));
+        user.setRole(RoleCode.USER);
+        user.setCompany(companyCrm);
+        user = userRepository.save(user);
     }
 }

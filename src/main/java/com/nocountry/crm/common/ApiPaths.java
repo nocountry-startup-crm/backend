@@ -11,4 +11,5 @@ public class ApiPaths {
     public static final String REGISTER_PATH = AUTH_BASE + "/register";
     public static final String LOGIN_PATH = AUTH_BASE + "/login";
     public static final String CONTACT_BASE = BASE + "/contact";
+    public static final String WHATSAPP_BASE = BASE + "/whatsapp";
 }

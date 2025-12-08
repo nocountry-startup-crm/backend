@@ -45,6 +45,25 @@ public class ContactService implements IContactService {
     private final ITagRepository tagRepository;
 
     @Override
+    public Contact findById(UUID contactId) {
+        return contactRepository.findById(contactId)
+                .orElseThrow(() -> new FunctionalException(
+                        "Contact not found. Please ensure the contact exists in the system.", HttpStatus.NOT_FOUND));
+    }
+
+    @Override
+    public Contact getContactByPhone(String phone) {
+        return contactRepository.findByPhone(phone)
+                .orElseGet(() -> createNewContact(phone));
+    }
+
+    private Contact createNewContact(String phone) {
+        Contact contact = new Contact();
+        contact.setPhone(phone);
+        return contactRepository.save(contact);
+    }
+
+    @Override
     public Contact save(CreateContactDto createContactDto) {
         if (contactRepository.existsByEmail(createContactDto.email())) {
             throw new FunctionalException("Email is already registered. Please use a different email address.", HttpStatus.CONFLICT);
