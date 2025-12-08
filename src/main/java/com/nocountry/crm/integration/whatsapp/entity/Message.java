@@ -12,7 +12,6 @@ import java.util.UUID;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-//@MappedSuperclass
 @Getter
 @Setter
 @NoArgsConstructor
@@ -48,23 +47,11 @@ public abstract class Message extends CompanyEntity {
     private MessageSource source;
 }
 
-/*public class Message {
-    // id
-    // Long contactId;
-    // direction; // "IN" o "OUT"
-    //content;
-    // timestamp -> dateAndTime;
-    // String whatsappMessageId;
-    //Long conversationId;
-}*/
-    /*private String type;      // TEXT, IMAGE, AUDIO, VIDEO, DOCUMENT, STICKER, INTERACTIVE
-    private String mediaUrl;  // URL pública que expone el archivo (servida por tu backend o S3)
-    private String mimeType;*/
-
 /*
 @SuperBuilder
+@MappedSuperclass
 @Data
-public class Message extends CompanyEntity { // abstract?
+public class Message extends CompanyEntity { // abstract
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 }*/
